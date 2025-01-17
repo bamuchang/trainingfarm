@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google認証</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+
+    <h1>Googleログイン</h1>
+
+    <!-- ログインボタン -->
+    <button id="google-signin-btn">Googleでログイン</button>
+
+    <script>
+        // Firebaseの初期化
+        const auth = firebase.auth();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        const googleSignInBtn = document.getElementById("google-signin-btn");
+
+        // Googleでログイン
+        googleSignInBtn.addEventListener("click", () => {
+            auth.signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                console.log("ログイン成功:", user);
+
+                // ログイン成功後に別の画面に遷移
+                window.location.href = "index.html"; // 遷移先のURLを指定
+            }).catch((error) => {
+                console.error("ログインエラー: ", error);
+            });
+        });
+    </script>
+
+</body>
+</html>

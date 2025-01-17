@@ -1,0 +1,59 @@
+/* 必要なスタイルを記述 */
+body {
+  margin: 0; /* デフォルトの余白を削除 */
+  padding: 0; /* デフォルトの余白を削除 */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  background-color: white; /* 必要に応じて背景色を変更 */
+}
+
+.container {
+  width: calc(100% - 40px); /* 左右の20pxを考慮 */
+  height: 60px;
+  background-color: lightblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid lightblue;
+  border-width: 60px 20px 0 20px; /* 上:60px、左右:20px */
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 0; /* 見出しのデフォルトの余白を削除 */
+  font-size: 24px; /* 必要に応じて調整 */
+  color: #333; /* 必要に応じて調整 */
+}
+
+h2, h3 {
+  margin-top: 0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
+}
+p{
+  margin:20px 0;
+}

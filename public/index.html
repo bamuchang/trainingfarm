@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>トレーニング牧場</title>
+</head>
+<body>
+  <div class="outer-container"> 
+  <h1 class="header">トレーニング牧場</h1>
+
+ 
+  <div class="inner-container"> 
+    トレーニングを記録することで、皆さんの継続をサポートします！<br>
+    右下の動物たちと一緒にトレーニングして、<br>
+    牧場のすべての動物たちの体型を元に戻しましょう！
+
+
+  
+
+  <h2>今日の目標を設定しましょう！</h2>
+  <div>
+    <input type="date" id="decide-goal-date">
+    <select id="decide-goal-exercise">
+      <option value="bench-press">ベンチプレス</option>
+      <option value="squat">スクワット</option>
+      <option value="deadlift">デッドリフト</option>
+      <option value="push-up">腕立て</option>
+      <option value="machine">その他(マシン)</option>
+      <option value="bodyweight">その他(自重)</option>
+    </select>
+    <br>
+    目標回数: <input type="number" id="decide-goal" min="0">
+    目標重量(kg): <input type="number" id="decide-goal-weight" min="0">
+    <button id="goal-button">目標を設定</button>
+  </div>
+
+  <!-- 実績を記録するセクション -->
+  <h2>やった内容を記録しましょう！</h2>
+  <div>
+    <input type="date" id="record-results-date">
+    <select id="record-results-exercise">
+      <option value="bench-press">ベンチプレス</option>
+      <option value="squat">スクワット</option>
+      <option value="deadlift">デッドリフト</option>
+      <option value="push-up">腕立て</option>
+      <option value="machine">その他(マシン)</option>
+      <option value="bodyweight">その他(自重)</option>
+    </select>
+    <br>
+    回数: <input type="number" id="record-results" min="0">
+    重量(kg): <input type="number" id="record-results-weight" min="0">
+    <button id="results-button">記録</button>
+  </div>
+
+  <!-- 結果表示セクション -->
+  <div>
+    <h3>目標</h3>
+    <div id="goals-display"></div>
+    <h3>今日の記録</h3>
+    <div id="today-results-display"></div>
+    <h3>目標達成度</h3>
+    <div id="proportion-display">目標達成度: 0%</div>
+  </div>
+  <div class="text-box" id="AA">
+    食べ過ぎちゃった<br>
+    　　∧＿∧<br>
+ ⊂/´･🐽･｀ヽ⊃<br>
+ 　!　　　　　i<br>
+   　ゝ c＿c_,.ノ<br>
+   正月太りのブタさんを痩せさせよう！   
+
+  </div>
+ </div>
+ </div>
+  <script>
+    let goals = {}; // 種目ごとの目標を重量別に保存
+    let results = {}; // 種目ごとの実績を重量別に保存
+    let lastGoalDate = null; // 最後に目標を記録した日付
+    let lastResultDate = null; // 最後に実績を記録した日付
+
+    // 目標を設定する処理
+    document.getElementById('goal-button').addEventListener('click', () => {
+      const date = document.getElementById('decide-goal-date').value;
+      const exercise = document.getElementById('decide-goal-exercise').value;
+      const goalReps = parseInt(document.getElementById('decide-goal').value, 10);
+      const goalWeight = parseInt(document.getElementById('decide-goal-weight').value, 10);
+
+      if (!date || isNaN(goalReps) || isNaN(goalWeight)) {
+        alert('目標の全ての項目を正しく入力してください。');
+        return;
+      }
+
+      // 日付が異なる場合、目標を更新し実績と目標達成率をリセット
+      if (lastGoalDate && lastGoalDate !== date) {
+        results = {}; // 実績リセット
+        updateTodayResultsDisplay(); // 実績表示を更新
+        updateProportionDisplay(); // 目標達成率リセット
+      }
+
+      if (!goals[exercise]) goals[exercise] = {};
+
+      // 重量ごとに目標を保存
+      goals[exercise][goalWeight] = { date, reps: goalReps, weight: goalWeight };
+      lastGoalDate = date;
+
+      updateGoalsDisplay();
+      alert('目標を更新しました！');
+    });
+
+    // 実績を記録する処理
+    document.getElementById('results-button').addEventListener('click', () => {
+      const date = document.getElementById('record-results-date').value;
+      const exercise = document.getElementById('record-results-exercise').value;
+      const resultReps = parseInt(document.getElementById('record-results').value, 10);
+      const resultWeight = parseInt(document.getElementById('record-results-weight').value, 10);
+
+      if (!date || isNaN(resultReps) || isNaN(resultWeight)) {
+        alert('実績の全ての項目を正しく入力してください。');
+        return;
+      }
+
+      // 実績の日付が目標の日付と異なる場合
+      if (lastGoalDate && lastGoalDate !== date) {
+        alert('目標を更新してください');
+        return;
+      }
+
+      if (!results[exercise]) results[exercise] = {};
+
+      // 重量が一致する場合は回数を加算、そうでない場合は新しい重量を追加
+      if (results[exercise][resultWeight]) {
+        results[exercise][resultWeight].reps += resultReps;
+      } else {
+        results[exercise][resultWeight] = { date, reps: resultReps, weight: resultWeight };
+      }
+      lastResultDate = date;
+
+      updateTodayResultsDisplay();
+      updateProportionDisplay();
+    });
+
+    // 目標の表示を更新
+    function updateGoalsDisplay() {
+      const display = document.getElementById('goals-display');
+      display.innerHTML = '';
+      for (const [exercise, weights] of Object.entries(goals)) {
+        display.innerHTML += `<h4>${exercise}</h4>`;
+        for (const [weight, data] of Object.entries(weights)) {
+          display.innerHTML += `<p>${weight}kg: ${data.reps}回 (日付: ${data.date})</p>`;
+        }
+      }
+    }
+
+    // 今日の記録の表示を更新
+    function updateTodayResultsDisplay() {
+      const display = document.getElementById('today-results-display');
+      display.innerHTML = '';
+      for (const [exercise, weights] of Object.entries(results)) {
+        display.innerHTML += `<h4>${exercise}</h4>`;
+        for (const [weight, data] of Object.entries(weights)) {
+          display.innerHTML += `<p>${weight}kg: ${data.reps}回 (日付: ${data.date})</p>`;
+        }
+      }
+    }
+
+    // 目標達成度の表示を更新
+
+
+function updateProportionDisplay() {
+  const display = document.getElementById('proportion-display');
+  display.innerHTML = '';
+  const textBox = document.getElementById("AA");
+  const originalText = textBox.innerHTML;
+  const newText = `痩せたよ！<br>
+          〇⌒ヘ⌒〇フ ))<br>
+          ～(　〈   ๑•🐽•〉<br>
+          　しーＵ－Ｕ<br>
+       明日もトレーニング頑張ろう！`;
+
+  let allExercisesComplete = true; // 全てのexerciseが100%かどうかを確認するフラグ
+
+  for (const [exercise, goalWeights] of Object.entries(goals)) {
+    let totalResult = 0;
+    let exerciseComplete = true; // このexerciseが100%かどうかを確認するフラグ
+
+    if (results[exercise]) {
+      for (const [weight, resultData] of Object.entries(results[exercise])) {
+        totalResult += weight * resultData.reps;
+      }
+    }
+
+    for (const [weight, goalData] of Object.entries(goalWeights)) {
+      const goalValue = weight * goalData.reps;
+      const proportion = totalResult > 0 ? (totalResult / goalValue) * 100 : 0;
+      display.innerHTML += `<p>${exercise} (${weight}kg): ${proportion.toFixed(2)}%</p>`;
+
+      // 目標が100%に達していない場合、このexerciseは未完了
+      if (proportion < 100) {
+        exerciseComplete = false;
+      }
+    }
+
+    // このexerciseが未完了の場合、全体のフラグをfalseに設定
+    if (!exerciseComplete) {
+      allExercisesComplete = false;
+    }
+  }
+
+  // 全てのexerciseが完了している場合にのみテキストを変更
+  if (allExercisesComplete) {
+    textBox.innerHTML = newText;
+  } else {
+    textBox.innerHTML = originalText; // 目標未達成の場合、元のテキストを維持
+  }
+}
+  </script>
+
+ <style>
+ body {
+  margin: 0; /* デフォルトの余白を削除 */
+  padding: 0; /* デフォルトの余白を削除 */
+  box-sizing: border-box;
+  background-color: white;
+ }
+
+ 
+ 
+ .outer-container {
+            padding: 40px 20px 20px; /* 上部60px、左右20pxの余白を作成 */
+            background-color: lightblue;
+            box-sizing: border-box;
+        }
+
+        .inner-container {
+            position: relative;
+            max-width: 800px; /* コンテンツの最大幅を設定 */
+            margin: 0 auto; /* 中央揃え */
+            background-color: white; /* 必要に応じて背景色を設定 */
+            padding: 20px; /* 内側の余白 */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* コンテンツに影を付ける（任意） */
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+ .header {
+  text-align: center;
+  height: 40px;
+  line-height: 40px; /* 垂直方向の中央揃え */
+  margin: 0 auto; /* 見出しの余白を削除 */
+  font-size: 30px;
+  color: #333;
+ }
+
+ .text-box {
+        position: absolute;
+        bottom: 10px; /* 下からの距離 */
+        right: 10px; /* 右からの距離 */
+        max-width: calc(100% - 20px); /* 内側の余白を考慮して最大幅を調整 */
+        font-size: 14px;
+        background-color: rgba(255, 255, 255); /* 背景を半透明にする例 */
+        padding: 10px;
+        border-radius: 5px;
+        box-sizing: border-box; /* パディングを含むサイズ計算 */
+        word-wrap: break-word; /* テキストが長い場合に折り返す */
+    }
+ </style>
+</body>
+
+</html>
